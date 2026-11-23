@@ -1,0 +1,377 @@
+{
+  "info": {
+    "name": "Price Service API",
+    "description": "Five exercise scenarios and representative client errors.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Exercise 1 - June 14 at 10:00",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/prices?applicationDate=2020-06-14T10:00:00&productId=35455&brandId=1",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "prices"
+          ],
+          "query": [
+            {
+              "key": "applicationDate",
+              "value": "2020-06-14T10:00:00"
+            },
+            {
+              "key": "productId",
+              "value": "35455"
+            },
+            {
+              "key": "brandId",
+              "value": "1"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test('Selected price and response fields', () => {",
+              "    pm.expect(body.productId).to.eql(35455);",
+              "    pm.expect(body.brandId).to.eql(1);",
+              "    pm.expect(body.priceListId).to.eql(1);",
+              "    pm.expect(body.startDate).to.eql('2020-06-14T00:00:00');",
+              "    pm.expect(body.endDate).to.eql('2020-12-31T23:59:59');",
+              "    pm.expect(body.price).to.eql(35.5);",
+              "    pm.expect(body.currency).to.eql('EUR');",
+              "    pm.expect(body).to.not.have.property('id');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Exercise 2 - June 14 at 16:00",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/prices?applicationDate=2020-06-14T16:00:00&productId=35455&brandId=1",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "prices"
+          ],
+          "query": [
+            {
+              "key": "applicationDate",
+              "value": "2020-06-14T16:00:00"
+            },
+            {
+              "key": "productId",
+              "value": "35455"
+            },
+            {
+              "key": "brandId",
+              "value": "1"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test('Selected price and response fields', () => {",
+              "    pm.expect(body.productId).to.eql(35455);",
+              "    pm.expect(body.brandId).to.eql(1);",
+              "    pm.expect(body.priceListId).to.eql(2);",
+              "    pm.expect(body.startDate).to.eql('2020-06-14T15:00:00');",
+              "    pm.expect(body.endDate).to.eql('2020-06-14T18:30:00');",
+              "    pm.expect(body.price).to.eql(25.45);",
+              "    pm.expect(body.currency).to.eql('EUR');",
+              "    pm.expect(body).to.not.have.property('id');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Exercise 3 - June 14 at 21:00",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/prices?applicationDate=2020-06-14T21:00:00&productId=35455&brandId=1",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "prices"
+          ],
+          "query": [
+            {
+              "key": "applicationDate",
+              "value": "2020-06-14T21:00:00"
+            },
+            {
+              "key": "productId",
+              "value": "35455"
+            },
+            {
+              "key": "brandId",
+              "value": "1"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test('Selected price and response fields', () => {",
+              "    pm.expect(body.productId).to.eql(35455);",
+              "    pm.expect(body.brandId).to.eql(1);",
+              "    pm.expect(body.priceListId).to.eql(1);",
+              "    pm.expect(body.startDate).to.eql('2020-06-14T00:00:00');",
+              "    pm.expect(body.endDate).to.eql('2020-12-31T23:59:59');",
+              "    pm.expect(body.price).to.eql(35.5);",
+              "    pm.expect(body.currency).to.eql('EUR');",
+              "    pm.expect(body).to.not.have.property('id');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Exercise 4 - June 15 at 10:00",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/prices?applicationDate=2020-06-15T10:00:00&productId=35455&brandId=1",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "prices"
+          ],
+          "query": [
+            {
+              "key": "applicationDate",
+              "value": "2020-06-15T10:00:00"
+            },
+            {
+              "key": "productId",
+              "value": "35455"
+            },
+            {
+              "key": "brandId",
+              "value": "1"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test('Selected price and response fields', () => {",
+              "    pm.expect(body.productId).to.eql(35455);",
+              "    pm.expect(body.brandId).to.eql(1);",
+              "    pm.expect(body.priceListId).to.eql(3);",
+              "    pm.expect(body.startDate).to.eql('2020-06-15T00:00:00');",
+              "    pm.expect(body.endDate).to.eql('2020-06-15T11:00:00');",
+              "    pm.expect(body.price).to.eql(30.5);",
+              "    pm.expect(body.currency).to.eql('EUR');",
+              "    pm.expect(body).to.not.have.property('id');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Exercise 5 - June 16 at 21:00",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/prices?applicationDate=2020-06-16T21:00:00&productId=35455&brandId=1",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "prices"
+          ],
+          "query": [
+            {
+              "key": "applicationDate",
+              "value": "2020-06-16T21:00:00"
+            },
+            {
+              "key": "productId",
+              "value": "35455"
+            },
+            {
+              "key": "brandId",
+              "value": "1"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test('Selected price and response fields', () => {",
+              "    pm.expect(body.productId).to.eql(35455);",
+              "    pm.expect(body.brandId).to.eql(1);",
+              "    pm.expect(body.priceListId).to.eql(4);",
+              "    pm.expect(body.startDate).to.eql('2020-06-15T16:00:00');",
+              "    pm.expect(body.endDate).to.eql('2020-12-31T23:59:59');",
+              "    pm.expect(body.price).to.eql(38.95);",
+              "    pm.expect(body.currency).to.eql('EUR');",
+              "    pm.expect(body).to.not.have.property('id');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Unknown product - 404",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/prices?applicationDate=2020-06-14T16:00:00&productId=99999&brandId=1",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "prices"
+          ],
+          "query": [
+            {
+              "key": "applicationDate",
+              "value": "2020-06-14T16:00:00"
+            },
+            {
+              "key": "productId",
+              "value": "99999"
+            },
+            {
+              "key": "brandId",
+              "value": "1"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 404', () => pm.response.to.have.status(404));",
+              "const body = pm.response.json();",
+              "pm.test('Problem details', () => {",
+              "    pm.expect(body.status).to.eql(404);",
+              "    pm.expect(body.title).to.eql('Not Found');",
+              "    pm.expect(body.detail).to.be.a('string');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Invalid product identifier - 400",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/prices?applicationDate=2020-06-14T16:00:00&productId=0&brandId=1",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "prices"
+          ],
+          "query": [
+            {
+              "key": "applicationDate",
+              "value": "2020-06-14T16:00:00"
+            },
+            {
+              "key": "productId",
+              "value": "0"
+            },
+            {
+              "key": "brandId",
+              "value": "1"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "const body = pm.response.json();",
+              "pm.test('Problem details', () => {",
+              "    pm.expect(body.status).to.eql(400);",
+              "    pm.expect(body.title).to.eql('Bad Request');",
+              "    pm.expect(body.detail).to.be.a('string');",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    }
+  ]
+}

@@ -1,84 +1,94 @@
 # Price Service API
 
-A Spring Boot service for a backend coding exercise about looking up the applicable price for a product, brand, and application date. The current phase provides the framework-independent domain rules and an H2 persistence adapter seeded with the exercise prices. The REST API is planned for a later phase.
+A runnable Spring Boot REST service that returns the applicable final price for a product, brand, and local application date. The original exercise is preserved in [docs/TestJava2023.txt](docs/TestJava2023.txt).
 
-The original functional requirements are preserved in [docs/TestJava2023.txt](docs/TestJava2023.txt).
+## Requirements and commands
 
-## Technology
-
-- Java 21
-- Spring Boot 3.5.16
-- Maven Wrapper (Maven 3.10.1)
-- Spring Web MVC, Spring Data JPA, Spring Validation
-- In-memory H2 database
-- SLF4J with Spring Boot's default Logback implementation
-- JUnit 5 and Spring Boot Test
-
-## Prerequisites
-
-Install a Java 21 JDK and configure `JAVA_HOME` to point to its installation directory. Confirm the setup in a new PowerShell window:
+Install a Java 21 JDK and set `JAVA_HOME` to that JDK. The included Maven Wrapper downloads Maven and project dependencies on its first run; no separate Maven installation is required. From PowerShell in the repository root:
 
 ```powershell
 java -version
-$env:JAVA_HOME
-```
-
-Both commands must resolve to a Java 21 JDK before running the Maven Wrapper. On Windows, Eclipse Temurin 21 can be installed with:
-
-```powershell
-winget install --id EclipseAdoptium.Temurin.21.JDK --exact
-```
-
-Close and reopen PowerShell after installation so that the updated environment variables are loaded. The included Maven Wrapper downloads Maven automatically on its first run, so a separate Maven installation is not required. The first build also downloads dependencies from Maven Central.
-
-## Build and test on Windows
-
-Open PowerShell in the repository root:
-
-```powershell
-.\mvnw.cmd clean test
-```
-
-To build the executable JAR:
-
-```powershell
-.\mvnw.cmd clean package
-```
-
-## Run on Windows
-
-```powershell
+.\mvnw.cmd clean verify
 .\mvnw.cmd spring-boot:run
 ```
 
-Press `Ctrl+C` to stop the application. The embedded server uses port `8080` by default. There are no application endpoints in this phase.
+The build creates an executable JAR at `target/price-service-api-0.0.1-SNAPSHOT.jar`. You can also run it with `java -jar target/price-service-api-0.0.1-SNAPSHOT.jar`. Stop the running service with `Ctrl+C`. It listens on port 8080 by default.
 
-## Architecture
+## REST API
 
-The project is organized around three layers under `com.example.priceservice`:
+`GET /api/v1/prices` accepts three required query parameters:
 
-- `domain` contains the immutable `Price` model, the `PriceSelector` domain service, and the `PriceQueryPort` output port. It does not depend on Spring or JPA.
-- `application` will contain use cases and coordination of domain operations.
-- `infrastructure.persistence` contains the JPA entity, Spring Data repository, and adapter that implements the output port. Future REST adapters and HTTP exception handling will also belong in infrastructure.
+| Parameter | Meaning | Format |
+| --- | --- | --- |
+| `applicationDate` | Local application date and time | ISO 8601 local date-time, e.g. `2020-06-14T16:00:00` |
+| `productId` | Product identifier | Positive integer |
+| `brandId` | Brand identifier | Positive integer |
 
-Empty package placeholders reserve space for later application and API components. `docs/postman` is reserved for an importable Postman collection once the API exists.
+Example request in PowerShell:
 
-## Domain rules
+```powershell
+Invoke-RestMethod 'http://localhost:8080/api/v1/prices?applicationDate=2020-06-14T16:00:00&productId=35455&brandId=1'
+```
 
-A price applies when its product and brand identifiers match and the requested date is between its start and end dates, inclusive. When multiple prices apply, the price with the highest numeric priority is selected. Selection returns an empty result when no price applies. If multiple applicable prices share the highest priority, selection reports an ambiguity because the original requirements define no tie-break rule.
+Successful response (`200 OK`):
 
-Identifiers must be positive, priority and amount must not be negative, dates and monetary values are required, and the start date must not be after the end date. Monetary amounts use `BigDecimal`, dates use `LocalDateTime`, and currencies use `java.util.Currency`.
+```json
+{
+  "productId": 35455,
+  "brandId": 1,
+  "priceListId": 2,
+  "startDate": "2020-06-14T15:00:00",
+  "endDate": "2020-06-14T18:30:00",
+  "price": 25.45,
+  "currency": "EUR"
+}
+```
 
-## Persistence and initialization
+Dates have no time-zone offset because the exercise supplies local timestamps. The amount uses `BigDecimal` internally and the response includes its ISO currency code. The storage-only JPA `ID` is never exposed.
 
-Hibernate creates the `PRICES` table in the in-memory H2 database at startup (`ddl-auto: create-drop`). Spring Boot then runs `src/main/resources/data.sql` because `spring.jpa.defer-datasource-initialization` is enabled. The script inserts the four original records from the exercise without any manual setup. This also applies to tests. The database exists only while the application is running.
+| Status | Meaning |
+| --- | --- |
+| `200 OK` | One applicable price was selected. |
+| `400 Bad Request` | A parameter is missing, malformed, or a product or brand ID is not positive. |
+| `404 Not Found` | No applicable price exists for the requested date, product, and brand. |
+| `409 Conflict` | Multiple applicable prices share the highest priority. |
+| `500 Internal Server Error` | An unexpected failure occurred. The response does not expose internal details. |
 
-The table maps `BRAND_ID`, `START_DATE`, `END_DATE`, `PRICE_LIST`, `PRODUCT_ID`, `PRIORITY`, `PRICE`, and `CURR` explicitly. Dates use `LocalDateTime`, which represents the exercise's local timestamps without a time zone. Prices use `BigDecimal` and a `DECIMAL(19,2)` column to retain cent precision. Currency codes are stored as three-character strings and converted to `Currency` in the adapter.
+Errors use Spring `ProblemDetail` (RFC 9457) with `type`, `title`, `status`, `detail`, and request `instance` fields. For example, an unknown product returns:
 
-JPA requires an entity identity, so `PRICES` has an auto-generated `ID` column in addition to the exercise columns. This is a storage-only identifier; it is not added to the domain `Price` record. `PRICE_LIST` has no uniqueness constraint because the exercise does not guarantee global uniqueness. The `PriceQueryPort` is in `domain.port`, following the repository's dependency rule: application code can depend on it without importing Spring or persistence classes. The JPA repository filters by product, brand, and inclusive start and end dates. It returns every matching row, including overlapping tariffs. The adapter maps those rows to domain `Price` values; `PriceSelector` alone applies the highest-priority rule and reports an ambiguity for equal highest priorities.
+```json
+{
+  "type": "about:blank",
+  "title": "Not Found",
+  "status": 404,
+  "detail": "No applicable price was found for the requested product, brand, and date",
+  "instance": "/api/v1/prices"
+}
+```
 
-## Tests and current scope
+## Selection and architecture
 
-The existing domain unit tests cover model invariants, inclusive dates, matching, priority, empty and ambiguous results, and the five exercise scenarios. H2 persistence integration tests verify seed loading, product and brand filters, exact date boundaries, out-of-range exclusion, field and amount mapping, overlapping candidates, and selection of the expected price for all five scenarios from stored data. Additional test rows are rolled back after each test and are never part of normal application startup.
+The service uses a simple hexagonal structure under `com.example.priceservice`:
 
-The application use case, REST endpoint, HTTP error contract, endpoint integration tests, and Postman collection belong to later phases. The application starts and initializes H2, but it does not yet expose a price lookup endpoint.
+- `domain` contains the immutable `Price` model, the `PriceQueryPort` output port, and `PriceSelector`. It has no Spring or JPA dependency.
+- `application` contains `GetApplicablePriceService`, which obtains candidates through the port and delegates selection to the domain service. It reports a missing price without depending on HTTP.
+- `infrastructure.persistence` implements the port with Spring Data JPA and maps JPA rows into domain prices.
+- `infrastructure.rest` validates the HTTP query, maps the selected price into a response DTO, and handles exceptions centrally.
+- `infrastructure.config` wires the domain selector and application service as Spring beans.
+
+A price is applicable when product and brand match and the application date falls within its start and end dates, inclusive. The highest numeric priority wins. A tie at the highest priority produces `409 Conflict`; the exercise does not specify a tie-break rule.
+
+## Data and tests
+
+H2 runs in memory. Hibernate creates the `PRICES` table on startup, then Spring Boot loads the four original prices from `src/main/resources/data.sql`. No external database or manual initialization is needed. Data is lost when the process stops. The table includes a generated technical `ID` for JPA; it is absent from the domain model and API.
+
+Run all unit and integration tests with `.\mvnw.cmd clean verify`. Domain tests cover invariants and selection rules. Application tests verify port use, selector delegation, priority selection, missing prices, and ambiguity without starting Spring. Persistence tests verify H2 seed data and query mapping. MockMvc integration tests use the full Spring context and seeded H2 data to assert all response fields for the five exercise scenarios, validation errors, missing prices, and an isolated ambiguity case. The ambiguity row is rolled back after its test.
+
+An importable collection with the five scenarios, one 404 request, and one 400 request is in [docs/postman/Price Service API.postman_collection.json](docs/postman/Price%20Service%20API.postman_collection.json). Its `baseUrl` variable defaults to `http://localhost:8080`.
+
+## Technical decisions
+
+- `LocalDateTime` represents the source timestamps without inventing a time zone; JSON uses ISO 8601.
+- `BigDecimal` and a `DECIMAL(19,2)` database column preserve cent precision.
+- The repository filters by product, brand, and inclusive date bounds; the domain selector alone applies priority.
+- `ProblemDetail` gives every handled error the same standard contract. Expected misses and ambiguous selections are logged without routine stack traces; unexpected failures are logged server-side and return a safe message.
