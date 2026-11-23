@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: price-service-api
+  datasource:
+    url: jdbc:h2:mem:prices;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+  jpa:
+    open-in-view: false
+    defer-datasource-initialization: true
+    hibernate:
+      ddl-auto: create-drop
+
+logging:
+  level:
+    root: INFO
+    com.example.priceservice: INFO
