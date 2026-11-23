@@ -7,6 +7,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.HttpMediaTypeNotAcceptableException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -33,6 +36,19 @@ public class PriceExceptionHandler {
     @ExceptionHandler({HandlerMethodValidationException.class, ConstraintViolationException.class})
     public ProblemDetail handleValidation(Exception exception) {
         return problem(HttpStatus.BAD_REQUEST, "Product and brand identifiers must be positive");
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ProblemDetail> handleUnsupportedMethod(HttpRequestMethodNotSupportedException exception) {
+        return new ResponseEntity<>(
+                problem(HttpStatus.METHOD_NOT_ALLOWED, "HTTP method is not supported for this endpoint"),
+                exception.getHeaders(),
+                HttpStatus.METHOD_NOT_ALLOWED);
+    }
+
+    @ExceptionHandler(HttpMediaTypeNotAcceptableException.class)
+    public ProblemDetail handleUnsupportedResponseType(HttpMediaTypeNotAcceptableException exception) {
+        return problem(HttpStatus.NOT_ACCEPTABLE, "Requested response media type is not supported");
     }
 
     @ExceptionHandler(PriceNotFoundException.class)

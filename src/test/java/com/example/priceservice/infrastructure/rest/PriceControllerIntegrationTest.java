@@ -4,16 +4,22 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.stream.Stream;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.request;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -120,6 +126,30 @@ class PriceControllerIntegrationTest {
     @Test
     void shouldReturnNotFoundForMissingFavicon() throws Exception {
         assertResourceNotFound("/favicon.ico");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"POST", "PUT", "DELETE"})
+    void shouldRejectUnsupportedMethods(String method) throws Exception {
+        mockMvc.perform(request(HttpMethod.valueOf(method), "/api/v1/prices"))
+                .andExpect(status().isMethodNotAllowed())
+                .andExpect(header().string("Allow", containsString("GET")))
+                .andExpect(jsonPath("$.status").value(405))
+                .andExpect(jsonPath("$.title").value("Method Not Allowed"))
+                .andExpect(jsonPath("$.detail").value("HTTP method is not supported for this endpoint"));
+    }
+
+    @Test
+    void shouldRejectUnsupportedResponseMediaType() throws Exception {
+        mockMvc.perform(get("/api/v1/prices")
+                        .param("applicationDate", "2020-06-14T16:00:00")
+                        .param("productId", "35455")
+                        .param("brandId", "1")
+                        .accept(MediaType.APPLICATION_XML))
+                .andExpect(status().isNotAcceptable())
+                .andExpect(jsonPath("$.status").value(406))
+                .andExpect(jsonPath("$.title").value("Not Acceptable"))
+                .andExpect(jsonPath("$.detail").value("Requested response media type is not supported"));
     }
 
     @Test
