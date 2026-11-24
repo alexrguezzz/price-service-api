@@ -4,13 +4,29 @@ A runnable Spring Boot REST service that returns the applicable final price for 
 
 ## Requirements and commands
 
-Install a Java 21 JDK and set `JAVA_HOME` to that JDK. The included Maven Wrapper downloads Maven and project dependencies on its first run; no separate Maven installation is required. From PowerShell in the repository root:
+Install a Java 21 JDK and set `JAVA_HOME` to that JDK. The included Maven Wrapper downloads Maven and project dependencies on its first run; no separate Maven installation is required.
+
+### Windows (PowerShell)
+
+From the repository root:
 
 ```powershell
 java -version
 .\mvnw.cmd clean verify
 .\mvnw.cmd spring-boot:run
 ```
+
+### Linux / macOS
+
+From the repository root:
+
+```bash
+java -version
+./mvnw clean verify
+./mvnw spring-boot:run
+```
+
+If the Maven Wrapper does not have execution permissions, run `chmod +x mvnw` before executing the commands.
 
 The build creates an executable JAR at `target/price-service-api-0.0.1-SNAPSHOT.jar`. You can also run it with `java -jar target/price-service-api-0.0.1-SNAPSHOT.jar`. Stop the running service with `Ctrl+C`. It listens on port 8080 by default.
 
