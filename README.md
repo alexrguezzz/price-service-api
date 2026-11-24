@@ -100,7 +100,9 @@ A price is applicable when product and brand match and the application date fall
 
 H2 runs in memory. Hibernate creates the `PRICES` table on startup, then Spring Boot loads the four original prices from `src/main/resources/data.sql`. No external database or manual initialization is needed. Data is lost when the process stops. The table includes a generated technical `ID` for JPA; it is absent from the domain model and API.
 
-Run all unit and integration tests with `.\mvnw.cmd clean verify`. Domain tests cover invariants and selection rules. Application tests verify port use, selector delegation, priority selection, missing prices, and ambiguity without starting Spring. Persistence tests verify H2 seed data and query mapping. MockMvc integration tests use the full Spring context and seeded H2 data to assert all response fields for the five exercise scenarios, validation errors, missing prices, unsupported methods and response media types, and an isolated ambiguity case. The ambiguity row is rolled back after its test.
+
+Run all unit and integration tests using the Maven Wrapper command for your operating system, as shown in the [Requirements and commands](#requirements-and-commands) section.
+ Domain tests cover invariants and selection rules. Application tests verify port use, selector delegation, priority selection, missing prices, and ambiguity without starting Spring. Persistence tests verify H2 seed data and query mapping. MockMvc integration tests use the full Spring context and seeded H2 data to assert all response fields for the five exercise scenarios, validation errors, missing prices, unsupported methods and response media types, and an isolated ambiguity case. The ambiguity row is rolled back after its test.
 
 An importable collection with the five scenarios, one 404 request, and one 400 request is in [docs/postman/Price Service API.postman_collection.json](docs/postman/Price%20Service%20API.postman_collection.json). Its `baseUrl` variable defaults to `http://localhost:8080`.
 
